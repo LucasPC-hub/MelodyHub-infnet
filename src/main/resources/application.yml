@@ -1,0 +1,86 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+  application:
+    name: melodyhub
+
+  # Configuração para hot-reload com DevTools
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/melodyhub}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/melodyhub-files
+
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:melodyhub}
+    password: ${SPRING_RABBITMQ_PASSWORD:melodyhub123}
+    listener:
+      simple:
+        acknowledge-mode: auto
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 10000
+          multiplier: 2.0
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# Observability - Actuator endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+
+# Logging configuration
+logging:
+  level:
+    edu.infnet.melodyhub: INFO
+    edu.infnet.melodyhub.domain.events: INFO
+    edu.infnet.melodyhub.application: INFO
+    edu.infnet.melodyhub.infrastructure.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
